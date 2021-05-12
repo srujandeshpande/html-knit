@@ -1,6 +1,18 @@
-const fs = require('fs')
+const fs = require('fs');
 
-function knit() {
+function read(filename) {
+    return new Promise((res, rej) => (fs.readFile(filename, 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+            rej();
+        }
+        var stream = data.toString() + "\n";
+        res(stream);
+    })
+    ))
+}
+
+async function knit() {
     let args = Array.from(arguments);
 
     var output_html = "";
@@ -50,10 +62,32 @@ function knit() {
         }
     }
 
+    var js_stream = "";
+    var css_stream = "";
+    var input_stream = "";
 
-    console.log(`${input_html},${output_html},${js_files},${css_files}`);
+    for (var i = 0; i < js_files.length; i++) {
+        js_stream += await read(js_files[i]);
+    }
+
+    for (var i = 0; i < css_files.length; i++) {
+        css_stream += await read(css_files[i]);
+    }
+
+    js_stream = "<script>\n" + js_stream + "</script>";
+    css_stream = "<style>\n" + css_stream + "</style>";
+
+    if (input_html != undefined) {
+        input_stream = await read(input_html);
+    }
+    else {
+        input_stream = "";
+        // Do something here
+    }
+    console.log(js_stream, css_stream, input_stream);
+
 }
-// output filename, input html, input css, input js
+
 module.exports = {
     knit: knit
 }
