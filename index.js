@@ -73,19 +73,52 @@ async function knit() {
     for (var i = 0; i < css_files.length; i++) {
         css_stream += await read(css_files[i]);
     }
-
-    js_stream = "<script>\n" + js_stream + "</script>";
-    css_stream = "<style>\n" + css_stream + "</style>";
+    if (js_files.length > 0) {
+        js_stream = "<script>\n" + js_stream + "</script>\n";
+    }
+    if (css_files.length > 0) {
+        css_stream = "<style>\n" + css_stream + "</style>\n";
+    }
 
     if (input_html != undefined) {
         input_stream = await read(input_html);
     }
     else {
         input_stream = "";
-        // Do something here
     }
-    console.log(js_stream, css_stream, input_stream);
 
+    var headEnd = -1;
+    for (var i = 0; i < input_stream.length; i++) {
+        if (input_stream.substring(i, i + 7) == "</head>") {
+            headEnd = i;
+            break;
+        }
+    }
+
+    var bodyEnd = -1;
+    for (var i = 0; i < input_stream.length; i++) {
+        if (input_stream.substring(i, i + 7) == "</body>") {
+            bodyEnd = i;
+            break;
+        }
+    }
+
+    var knitted_stream = ""
+    if (bodyEnd != -1) {
+        knitted_stream = input_stream.substring(0, bodyEnd) + js_stream + input_stream.substring(bodyEnd);
+    }
+    else {
+        knitted_stream = input_stream + js_stream;
+    }
+
+    if (headEnd != -1) {
+        knitted_stream = knitted_stream.substring(0, headEnd) + css_stream + knitted_stream.substring(headEnd);
+    }
+    else {
+        knitted_stream = css_stream + knitted_stream;
+    }
+
+    console.log(knitted_stream)
 }
 
 module.exports = {
