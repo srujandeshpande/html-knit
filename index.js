@@ -80,45 +80,49 @@ async function knit() {
         css_stream = "<style>\n" + css_stream + "</style>\n";
     }
 
+    var knitted_stream = ""
+
     if (input_html != undefined) {
         input_stream = await read(input_html);
-    }
-    else {
-        input_stream = "";
-    }
 
-    var headEnd = -1;
-    for (var i = 0; i < input_stream.length; i++) {
-        if (input_stream.substring(i, i + 7) == "</head>") {
-            headEnd = i;
-            break;
+        var headEnd = -1;
+        for (var i = 0; i < input_stream.length; i++) {
+            if (input_stream.substring(i, i + 7) == "</head>") {
+                headEnd = i;
+                break;
+            }
+        }
+
+        var bodyEnd = -1;
+        for (var i = 0; i < input_stream.length; i++) {
+            if (input_stream.substring(i, i + 7) == "</body>") {
+                bodyEnd = i;
+                break;
+            }
+        }
+
+        if (bodyEnd != -1) {
+            knitted_stream = input_stream.substring(0, bodyEnd) + js_stream + input_stream.substring(bodyEnd);
+        }
+        else {
+            knitted_stream = input_stream + js_stream;
+        }
+
+        if (headEnd != -1) {
+            knitted_stream = knitted_stream.substring(0, headEnd) + css_stream + knitted_stream.substring(headEnd);
+        }
+        else {
+            knitted_stream = css_stream + knitted_stream;
         }
     }
-
-    var bodyEnd = -1;
-    for (var i = 0; i < input_stream.length; i++) {
-        if (input_stream.substring(i, i + 7) == "</body>") {
-            bodyEnd = i;
-            break;
-        }
-    }
-
-    var knitted_stream = ""
-    if (bodyEnd != -1) {
-        knitted_stream = input_stream.substring(0, bodyEnd) + js_stream + input_stream.substring(bodyEnd);
-    }
     else {
-        knitted_stream = input_stream + js_stream;
+        knitted_stream = "<!DOCTYPE html>\n<html>\n<head>\n" + css_stream + "</head>\n<body>\n" + js_stream + "</body>\n</html>\n";
     }
 
-    if (headEnd != -1) {
-        knitted_stream = knitted_stream.substring(0, headEnd) + css_stream + knitted_stream.substring(headEnd);
-    }
-    else {
-        knitted_stream = css_stream + knitted_stream;
-    }
-
-    console.log(knitted_stream)
+    fs.writeFile(output_html, knitted_stream, (err) => {
+        // In case of a error throw err. 
+        if (err) throw err;
+    })
 }
 
 module.exports = {
