@@ -1,5 +1,8 @@
 # HTML Knit
 Knit together multiple HTML, CSS and JavaScript files into a single HTML file.
+<p align="center">
+  <a href="https://nodei.co/npm/html-knit/"><img src="https://nodei.co/npm/html-knit.png?downloads=true&stars=true" alt="npm installnfo" /></a>
+</p>
 
 ## Usage 
 
